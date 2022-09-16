@@ -10,5 +10,5 @@ public class ButtonDictionary {
     public final static String PAY_BUTTON = "/pay";
     public final static String SETTINGS_BUTTON = "/settings";
     public final static String DELETE_MY_DATA_AGREED_BUTTON = "/agreetodelete";
-    public final static String DELETE_MY_DATA_REFUSAL_BUTTON = "/agreetodelete";
+    public final static String DELETE_MY_DATA_REFUSAL_BUTTON = "/disagreetodelete";
 }
