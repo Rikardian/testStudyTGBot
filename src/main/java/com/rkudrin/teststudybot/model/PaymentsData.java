@@ -15,9 +15,12 @@ public class PaymentsData {
 
     private LocalDateTime studyPaidDate;
 
-    public PaymentsData(Long paymentId, LocalDateTime studyPaidDate) {
+    private String currentPayment;
+
+    public PaymentsData(Long paymentId, LocalDateTime studyPaidDate, String currentPayment) {
         this.paymentId = paymentId;
         this.studyPaidDate = studyPaidDate;
+        this.currentPayment = currentPayment;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
