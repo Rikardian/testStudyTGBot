@@ -51,4 +51,14 @@ public class UserService {
     public void deleteUser(long chatId) {
         userRepository.deleteUserByChatId(chatId);
     }
+
+    public boolean checkUserExist(long chatId){
+        try {
+            User user = userRepository.findUserByChatId(chatId);
+            return user.getChatId() != null;
+        } catch (NullPointerException e){
+            log.error(e.getMessage());
+            return false;
+        }
+    }
 }

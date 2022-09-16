@@ -84,7 +84,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
             if (callBackData.equals(ButtonDictionary.DELETE_MY_DATA_AGREED_BUTTON)){
                 try {
-                    if (userService.findById(chatId).getChatId() != null){
+                    if (userService.checkUserExist(chatId)){
                         userService.deleteUser(chatId);
                         messageExecute(getMessage(chatId, "Данные успешно удалены"));
                     }
