@@ -62,7 +62,7 @@ public class UserService {
         }
     }
 
-    public boolean updateUserCurrentStage(long chatId, String callBackData) {
+    public boolean updateUserCurrentStage(long chatId) {
         try {
             User user = userRepository.findUserByChatId(chatId);
             return user.getChatId() != null;
@@ -70,5 +70,14 @@ public class UserService {
             log.error(e.getMessage());
             return false;
         }
+    }
+
+    public void upUserTotalStage(User user) {
+        int updatedStage = user.getCurrentStudyStage() + 1;
+        user.setCurrentStudyStage(updatedStage);
+        if (updatedStage > user.getTotalStudyStage()){
+            user.setTotalStudyStage(updatedStage);
+        }
+        userRepository.save(user);
     }
 }

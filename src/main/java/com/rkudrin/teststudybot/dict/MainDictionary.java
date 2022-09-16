@@ -23,4 +23,12 @@ public class MainDictionary {
 
                                 Введите /start, чтобы пройти регистрацию и начать обучение""";
 
+    public final static String USER_NF_EXCEPTION = "Пользователь не найден ";
+
+    public final static String HOW_TO_ANSWER_TEXT = "Чтобы ответить на задание, введите ваш ответ";
+
+    public final static String CORRECT_ANSWER = "Ответ правильный! Поздарвляю, вы переходите на следующий этап обучения!";
+
+    public final static String INCORRECT_ANSWER = "Неправильный ответ! Попробуй еще раз";
+
 }
