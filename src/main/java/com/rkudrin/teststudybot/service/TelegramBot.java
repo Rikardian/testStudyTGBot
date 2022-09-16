@@ -2,10 +2,7 @@ package com.rkudrin.teststudybot.service;
 
 import com.rkudrin.teststudybot.config.BotConfig;
 import com.rkudrin.teststudybot.dict.ButtonDictionary;
-import com.rkudrin.teststudybot.dict.RankDictionary;
-import com.rkudrin.teststudybot.model.PaymentsData;
 import com.rkudrin.teststudybot.model.User;
-import com.rkudrin.teststudybot.repo.UserRepository;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,20 +10,14 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButtonPollType;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,13 +25,13 @@ import java.util.List;
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
 
-    final BotConfig config;
-    private final UserRepository userRepository;
+    private final BotConfig config;
+    private final UserService userService;
 
     @Autowired
-    public TelegramBot(BotConfig config, UserRepository userRepository) {
+    public TelegramBot(BotConfig config, UserService userService) {
         this.config = config;
-        this.userRepository = userRepository;
+        this.userService = userService;
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "Начать работу"));
         listOfCommands.add(new BotCommand("/study", "Перейти к обучению"));
@@ -89,17 +80,16 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
         } else if (update.hasCallbackQuery()) {
             String callBackData = update.getCallbackQuery().getData();
-            long messageId = update.getCallbackQuery().getMessage().getMessageId();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
 
             if (callBackData.equals(ButtonDictionary.DELETE_MY_DATA_AGREED_BUTTON)){
                 try {
-                    if (userRepository.findUserByChatId(chatId).getChatId() != null){
-                        userRepository.deleteUserByChatId(chatId);
-                        messageExecute(getMessage(messageId, "Данные успешно удалены"));
+                    if (userService.findById(chatId).getChatId() != null){
+                        userService.deleteUser(chatId);
+                        messageExecute(getMessage(chatId, "Данные успешно удалены"));
                     }
                     else {
-                        messageExecute(getMessage(messageId, "Данные уже были удалены"));
+                        messageExecute(getMessage(chatId, "Данные уже были удалены"));
                     }
                 } catch (Exception e){
                     log.error("Что-то пошло не так при удалении данных: " + e.getMessage());
@@ -107,10 +97,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
             }
             else if (callBackData.equals(ButtonDictionary.DELETE_MY_DATA_REFUSAL_BUTTON)){
-                messageExecute(getMessage(messageId, "Запрос отклонён. Введите /help для получения списка возможных запросов"));
+                messageExecute(getMessage(chatId, "Запрос отклонён. Введите /help для получения списка возможных запросов"));
             }
             else {
-                messageExecute(getMessage(messageId, "Что-то пошло не так. Введите /help для получения списка возможных запросов"));
+                messageExecute(getMessage(chatId, "Что-то пошло не так. Введите /help для получения списка возможных запросов"));
             }
 
         }
@@ -145,7 +135,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void getUserData(long chatId) {
-        User user = userRepository.findUserByChatId(chatId);
+        User user = userService.findById(chatId);
 
         try {
             messageExecute(getMessage(chatId, user.toString()));
@@ -201,26 +191,8 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     //Регистрация нового пользователя
     private void registerUser(Message message) {
-        if (userRepository.findById(message.getChatId()).isEmpty()) {
-
-            Long chatId = message.getChatId();
-            Chat chat = message.getChat();
-
-            User user = new User();
-
-            user.setChatId(chatId);
-            user.setUserName(chat.getUserName());
-            user.setFirstName(chat.getFirstName());
-            user.setLastName(chat.getLastName());
-            user.setRank(RankDictionary.firstRank);
-            user.setCurrentStudyStage(0);
-            user.setRegisteredAt(LocalDateTime.now());
-            user.setTotalStudyStage(0);
-            user.setStudyPaid(false);
-
-            userRepository.save(user);
-            log.info("user saved: " + user);
-
+        if (userService.findById(message.getChatId()) == null) {
+            userService.createUserById(message);
         }
     }
 }
