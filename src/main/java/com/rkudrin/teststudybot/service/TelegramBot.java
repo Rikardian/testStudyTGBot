@@ -44,8 +44,8 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "Начать работу"));
         listOfCommands.add(new BotCommand("/study", "Перейти к обучению"));
-        listOfCommands.add(new BotCommand("/getdata", "Получить ваши данные"));
-        listOfCommands.add(new BotCommand("/deletedata", "Удалить ваши данные"));
+        listOfCommands.add(new BotCommand("/getmydata", "Получить ваши данные"));
+        listOfCommands.add(new BotCommand("/deletemydata", "Удалить ваши данные"));
         listOfCommands.add(new BotCommand("/help", "Информация об использовании бота"));
         listOfCommands.add(new BotCommand("/settings", "Поменять ваши настройки"));
         try {
@@ -78,9 +78,82 @@ public class TelegramBot extends TelegramLongPollingBot {
                     registerUser(message);
                     startCommandReceived(chatId, message.getChat().getFirstName());
                     break;
+                case "/getmydata":
+                    getUserData(chatId);
+                    break;
+                case "/deletemydata":
+                    deleteUserData(chatId);
+                    break;
                 default:
                     messageExecute(getMessage(chatId, "Извини, я не знаю такую команду"));
             }
+        } else if (update.hasCallbackQuery()) {
+            String callBackData = update.getCallbackQuery().getData();
+            long messageId = update.getCallbackQuery().getMessage().getMessageId();
+            long chatId = update.getCallbackQuery().getMessage().getChatId();
+
+            if (callBackData.equals(ButtonDictionary.DELETE_MY_DATA_AGREED_BUTTON)){
+                try {
+                    if (userRepository.findUserByChatId(chatId).getChatId() != null){
+                        userRepository.deleteUserByChatId(chatId);
+                        messageExecute(getMessage(messageId, "Данные успешно удалены"));
+                    }
+                    else {
+                        messageExecute(getMessage(messageId, "Данные уже были удалены"));
+                    }
+                } catch (Exception e){
+                    log.error("Что-то пошло не так при удалении данных: " + e.getMessage());
+                    System.out.println(e.getMessage());
+                }
+            }
+            else if (callBackData.equals(ButtonDictionary.DELETE_MY_DATA_REFUSAL_BUTTON)){
+                messageExecute(getMessage(messageId, "Запрос отклонён. Введите /help для получения списка возможных запросов"));
+            }
+            else {
+                messageExecute(getMessage(messageId, "Что-то пошло не так. Введите /help для получения списка возможных запросов"));
+            }
+
+        }
+    }
+
+    private void deleteUserData(long chatId) {
+        String answer = "Вы уверены, что хотите удалить все данные о себе? Вы не сможете вернуть эти изменения.";
+        SendMessage message = getMessage(chatId, answer);
+
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
+        List<InlineKeyboardButton> rowInLineAgreed = new ArrayList<>();
+        List<InlineKeyboardButton> rowInLineRefuse = new ArrayList<>();
+
+        InlineKeyboardButton agreedButton = new InlineKeyboardButton();
+        agreedButton.setText("Да, я согласен удалить данные без возможности возврата");
+        agreedButton.setCallbackData(ButtonDictionary.DELETE_MY_DATA_AGREED_BUTTON);
+        rowInLineAgreed.add(agreedButton);
+
+        InlineKeyboardButton refuseButton = new InlineKeyboardButton();
+        refuseButton.setText("Нет, отменить операцию");
+        refuseButton.setCallbackData(ButtonDictionary.DELETE_MY_DATA_REFUSAL_BUTTON);
+        rowInLineRefuse.add(refuseButton);
+
+        rowsInLine.add(rowInLineAgreed);
+        rowsInLine.add(rowInLineRefuse);
+        keyboardMarkup.setKeyboard(rowsInLine);
+
+        message.setReplyMarkup(keyboardMarkup);
+        messageExecute(message);
+
+    }
+
+    private void getUserData(long chatId) {
+        User user = userRepository.findUserByChatId(chatId);
+
+        try {
+            messageExecute(getMessage(chatId, user.toString()));
+        } catch (NullPointerException e){
+            messageExecute(getMessage(chatId, "Данные не найдены, пройдите регистрацию"));
+            log.error("Ошибка при получении данных пользователя + " + e.getMessage());
+        } catch (Exception e){
+            log.error("Ошибка при получении данных пользователя + " + e.getMessage());
         }
     }
 
@@ -121,14 +194,14 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void messageExecute(SendMessage message) {
         try {
             execute(message);
-        } catch (TelegramApiException e){
+        } catch (TelegramApiException e) {
             log.error("Произошла ошибка при отправке сообщения: " + e.getMessage());
         }
     }
 
     //Регистрация нового пользователя
     private void registerUser(Message message) {
-        if (userRepository.findById(message.getChatId()).isEmpty()){
+        if (userRepository.findById(message.getChatId()).isEmpty()) {
 
             Long chatId = message.getChatId();
             Chat chat = message.getChat();
