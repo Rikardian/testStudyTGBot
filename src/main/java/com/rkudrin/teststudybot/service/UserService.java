@@ -35,9 +35,9 @@ public class UserService {
         user.setFirstName(chat.getFirstName());
         user.setLastName(chat.getLastName());
         user.setRank(RankDictionary.firstRank);
-        user.setCurrentStudyStage(0);
+        user.setCurrentStudyStage(1);
         user.setRegisteredAt(LocalDateTime.now());
-        user.setTotalStudyStage(0);
+        user.setTotalStudyStage(1);
         user.setStudyPaid(false);
 
         userRepository.save(user);
@@ -53,6 +53,16 @@ public class UserService {
     }
 
     public boolean checkUserExist(long chatId){
+        try {
+            User user = userRepository.findUserByChatId(chatId);
+            return user.getChatId() != null;
+        } catch (NullPointerException e){
+            log.error(e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean updateUserCurrentStage(long chatId, String callBackData) {
         try {
             User user = userRepository.findUserByChatId(chatId);
             return user.getChatId() != null;

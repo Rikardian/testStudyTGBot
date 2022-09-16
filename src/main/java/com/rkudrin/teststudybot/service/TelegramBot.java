@@ -2,6 +2,7 @@ package com.rkudrin.teststudybot.service;
 
 import com.rkudrin.teststudybot.config.BotConfig;
 import com.rkudrin.teststudybot.dict.ButtonDictionary;
+import com.rkudrin.teststudybot.dict.MainDictionary;
 import com.rkudrin.teststudybot.model.User;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +76,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "/deletemydata":
                     deleteUserData(chatId);
                     break;
+                case "/help":
+                    messageExecute(getMessage(chatId, MainDictionary.HELP_TEXT));
+                    break;
+                case "/settings":
+                    settingCommandReceived(chatId);
+                    break;
+                case "/study":
+                    studyCommandReceived(chatId);
                 default:
                     messageExecute(getMessage(chatId, "Извини, я не знаю такую команду"));
             }
@@ -82,29 +91,75 @@ public class TelegramBot extends TelegramLongPollingBot {
             String callBackData = update.getCallbackQuery().getData();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-            if (callBackData.equals(ButtonDictionary.DELETE_MY_DATA_AGREED_BUTTON)){
-                try {
-                    if (userService.checkUserExist(chatId)){
-                        userService.deleteUser(chatId);
-                        messageExecute(getMessage(chatId, "Данные успешно удалены"));
+            switch (callBackData) {
+                case ButtonDictionary.DELETE_MY_DATA_AGREED_BUTTON:
+                    try {
+                        if (userService.checkUserExist(chatId)) {
+                            userService.deleteUser(chatId);
+                            messageExecute(getMessage(chatId, "Данные успешно удалены"));
+                        } else {
+                            messageExecute(getMessage(chatId, "Данные уже были удалены"));
+                        }
+                    } catch (Exception e) {
+                        log.error("Что-то пошло не так при удалении данных: " + e.getMessage());
+                        System.out.println(e.getMessage());
                     }
-                    else {
-                        messageExecute(getMessage(chatId, "Данные уже были удалены"));
-                    }
-                } catch (Exception e){
-                    log.error("Что-то пошло не так при удалении данных: " + e.getMessage());
-                    System.out.println(e.getMessage());
-                }
-            }
-            else if (callBackData.equals(ButtonDictionary.DELETE_MY_DATA_REFUSAL_BUTTON)){
-                messageExecute(getMessage(chatId, "Запрос отклонён. Введите /help для получения списка возможных запросов"));
-            }
-            else {
-                messageExecute(getMessage(chatId, "Что-то пошло не так. Введите /help для получения списка возможных запросов"));
+                    break;
+                case ButtonDictionary.DELETE_MY_DATA_REFUSAL_BUTTON:
+                    messageExecute(getMessage(chatId, "Запрос отклонён. Введите /help для получения списка возможных запросов"));
+                    break;
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                    messageExecute(getMessage(chatId, "Вы перешли на " + callBackData + "этап обучения"));
+                    break;
+                default:
+                    messageExecute(getMessage(chatId, "Что-то пошло не так. Введите /help для получения списка возможных запросов"));
             }
 
         }
     }
+
+    private void studyCommandReceived(long chatId) {
+        int stage = userService.findById(chatId).getCurrentStudyStage();
+
+    }
+
+    private void settingCommandReceived(long chatId) {
+        try {
+            int stage = userService.findById(chatId).getTotalStudyStage();
+            SendMessage message = getMessage(chatId, MainDictionary.SETTINGS_TEXT);
+
+            InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+            List<List<InlineKeyboardButton>> rowsInLine = new ArrayList<>();
+            List<InlineKeyboardButton> firstRow = new ArrayList<>();
+            List<InlineKeyboardButton> secondRow = new ArrayList<>();
+            InlineKeyboardButton button = new InlineKeyboardButton();
+
+            for (int i = 1; i < stage + 1; i++) {
+                button.setText(String.valueOf(i));
+                button.setCallbackData(String.valueOf(i));
+                if (i % 2 == 0)
+                    secondRow.add(button);
+                else
+                    firstRow.add(button);
+            }
+            rowsInLine.add(firstRow);
+            rowsInLine.add(secondRow);
+            keyboardMarkup.setKeyboard(rowsInLine);
+
+            message.setReplyMarkup(keyboardMarkup);
+
+            messageExecute(message);
+        } catch (NullPointerException e) {
+            log.error("Пользователь не найден " + e.getMessage());
+            messageExecute(getMessage(chatId, MainDictionary.USER_NOT_FOUND_TEXT));
+        }
+    }
+
 
     private void deleteUserData(long chatId) {
         String answer = "Вы уверены, что хотите удалить все данные о себе? Вы не сможете вернуть эти изменения.";
@@ -139,10 +194,10 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         try {
             messageExecute(getMessage(chatId, user.toString()));
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             messageExecute(getMessage(chatId, "Данные не найдены, пройдите регистрацию"));
             log.error("Ошибка при получении данных пользователя + " + e.getMessage());
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Ошибка при получении данных пользователя + " + e.getMessage());
         }
     }
