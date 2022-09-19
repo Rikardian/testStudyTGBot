@@ -160,9 +160,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         keyboardMarkup.setKeyboard(rowsInLine);
         correctAnswerMessage.setReplyMarkup(keyboardMarkup);
 
-        switch(stage){
+        switch (stage) {
             case 1:
-                if (answer == 4){
+                if (answer == 4) {
                     userStageUp(chatId);
                     messageExecute(correctAnswerMessage);
                 } else {
@@ -170,7 +170,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
                 break;
             case 2:
-                if (answer == 6){
+                if (answer == 6) {
                     userStageUp(chatId);
                     messageExecute(correctAnswerMessage);
                 } else {
@@ -178,7 +178,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
                 break;
             case 3:
-                if (answer == 0){
+                if (answer == 0) {
                     userStageUp(chatId);
                     messageExecute(correctAnswerMessage);
                     userService.updateUserRank(RankDictionary.SECOND_RANK, chatId);
@@ -187,7 +187,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
                 break;
             case 4:
-                if (answer == 25){
+                if (answer == 25) {
                     userStageUp(chatId);
                     messageExecute(correctAnswerMessage);
                 } else {
@@ -195,7 +195,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
                 break;
             case 5:
-                if (answer == 18){
+                if (answer == 18) {
                     userStageUp(chatId);
                     messageExecute(correctAnswerMessage);
                 } else {
@@ -203,7 +203,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
                 break;
             case 6:
-                if (answer == 993){
+                if (answer == 993) {
                     userStageUp(chatId);
                     messageExecute(getMessage(chatId, "Поздарвляю! Вы завершили обучение! Теперь вы готовы творить..."));
                     userService.updateUserRank(RankDictionary.THIRD_RANK, chatId);
@@ -211,8 +211,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                     messageExecute(incorrectAnswerMessage);
                 }
                 break;
-            case 7:
-                messageExecute(getMessage(chatId, "Вы уже завершили обучение. Вы можете вернуться к предыдущим этапам обучения с помощью команды /settings."));
             default:
                 messageExecute(getMessage(chatId, "Что-то пошло не так. Попробуй еще раз или свяжись с наставником"));
         }
@@ -287,6 +285,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                         MainDictionary.HOW_TO_ANSWER_TEXT);
                 messageExecute(message);
             }
+            case 7 ->
+                messageExecute(getMessage(chatId, "Вы уже завершили обучение. Вы можете вернуться к предыдущим этапам обучения с помощью команды /settings."));
             default -> {
                 message.setText("Что-то пошло не так. Попробуйте позже и сообщите об этом ментору");
                 messageExecute(message);
