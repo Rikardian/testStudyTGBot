@@ -2,8 +2,8 @@ package com.rkudrin.teststudybot.dict;
 
 public class RankDictionary {
 
-    public final static String firstRank = "Начинающий";
-    public final static String secondRank = "Студент";
-    public final static String thirdRank = "Выпускник";
-    public final static String mentorRank = "Наставник";
+    public final static String FIRST_RANK = "Начинающий";
+    public final static String SECOND_RANK = "Студент";
+    public final static String THIRD_RANK = "Выпускник";
+    public final static String MENTOR_RANK = "Наставник";
 }

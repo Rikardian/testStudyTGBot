@@ -25,7 +25,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void createUserById(Message message){
+    public void createUserById(Message message) {
         Chat chat = message.getChat();
 
         User user = new User();
@@ -34,7 +34,7 @@ public class UserService {
         user.setUserName(chat.getUserName());
         user.setFirstName(chat.getFirstName());
         user.setLastName(chat.getLastName());
-        user.setRank(RankDictionary.firstRank);
+        user.setRank(RankDictionary.FIRST_RANK);
         user.setCurrentStudyStage(1);
         user.setRegisteredAt(LocalDateTime.now());
         user.setTotalStudyStage(1);
@@ -52,32 +52,44 @@ public class UserService {
         userRepository.deleteUserByChatId(chatId);
     }
 
-    public boolean checkUserExist(long chatId){
+    public boolean checkUserExist(long chatId) {
         try {
             User user = userRepository.findUserByChatId(chatId);
             return user.getChatId() != null;
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             log.error(e.getMessage());
             return false;
         }
     }
 
-    public boolean updateUserCurrentStage(long chatId) {
+    public void updateUserCurrentStage(long chatId, String stage) {
         try {
             User user = userRepository.findUserByChatId(chatId);
-            return user.getChatId() != null;
-        } catch (NullPointerException e){
+            user.setCurrentStudyStage(Integer.parseInt(stage));
+            userRepository.save(user);
+        } catch (NullPointerException e) {
             log.error(e.getMessage());
-            return false;
         }
     }
 
     public void upUserTotalStage(User user) {
         int updatedStage = user.getCurrentStudyStage() + 1;
         user.setCurrentStudyStage(updatedStage);
-        if (updatedStage > user.getTotalStudyStage()){
+        if (updatedStage > user.getTotalStudyStage()) {
             user.setTotalStudyStage(updatedStage);
         }
         userRepository.save(user);
+    }
+
+    public void updateUserRank(String rank, long chatId) {
+        try {
+            User user = userRepository.findUserByChatId(chatId);
+            if (!user.getRank().equals(RankDictionary.THIRD_RANK)) {
+                user.setRank(rank);
+            }
+            userRepository.save(user);
+        } catch (NullPointerException e) {
+            log.error(e.getMessage());
+        }
     }
 }

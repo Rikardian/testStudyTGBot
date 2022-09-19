@@ -3,6 +3,7 @@ package com.rkudrin.teststudybot.service;
 import com.rkudrin.teststudybot.config.BotConfig;
 import com.rkudrin.teststudybot.dict.ButtonDictionary;
 import com.rkudrin.teststudybot.dict.MainDictionary;
+import com.rkudrin.teststudybot.dict.RankDictionary;
 import com.rkudrin.teststudybot.model.User;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
@@ -129,7 +130,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "5":
                 case "6":
                     messageExecute(getMessage(chatId, "Вы перешли на " + callBackData + " этап обучения"));
-                    userService.updateUserCurrentStage(chatId);
+                    userService.updateUserCurrentStage(chatId, callBackData);
                     break;
                 default:
                     messageExecute(getMessage(chatId, "Что-то пошло не так. Введите /help для получения списка возможных запросов"));
@@ -180,6 +181,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 if (answer == 0){
                     userStageUp(chatId);
                     messageExecute(correctAnswerMessage);
+                    userService.updateUserRank(RankDictionary.SECOND_RANK, chatId);
                 } else {
                     messageExecute(incorrectAnswerMessage);
                 }
@@ -203,11 +205,14 @@ public class TelegramBot extends TelegramLongPollingBot {
             case 6:
                 if (answer == 993){
                     userStageUp(chatId);
-                    messageExecute(getMessage(chatId, "Поздарвляю! Вы завершили обучение! А я за сегодня уже заебался пойду отдохну чуть-чуть вихатной"));
+                    messageExecute(getMessage(chatId, "Поздарвляю! Вы завершили обучение! Теперь вы готовы творить..."));
+                    userService.updateUserRank(RankDictionary.THIRD_RANK, chatId);
                 } else {
                     messageExecute(incorrectAnswerMessage);
                 }
                 break;
+            case 7:
+                messageExecute(getMessage(chatId, "Вы уже завершили обучение. Вы можете вернуться к предыдущим этапам обучения с помощью команды /settings."));
             default:
                 messageExecute(getMessage(chatId, "Что-то пошло не так. Попробуй еще раз или свяжись с наставником"));
         }
