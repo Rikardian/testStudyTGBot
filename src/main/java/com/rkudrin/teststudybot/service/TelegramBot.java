@@ -246,45 +246,46 @@ public class TelegramBot extends TelegramLongPollingBot {
         SendMessage message = getMessage(chatId, "");
 
         switch (stage) {
-            case 1:
+            case 1 -> {
                 message.setText("Задание номер " + stage + ":\n\n" +
                         "Сколько будет 2 + 2 ?\n\n" +
                         MainDictionary.HOW_TO_ANSWER_TEXT);
                 messageExecute(message);
-                break;
-            case 2:
+            }
+            case 2 -> {
                 message.setText("Задание номер " + stage + ":\n\n" +
                         "Сколько будет 2 + 2 * 2 ?\n\n" +
                         MainDictionary.HOW_TO_ANSWER_TEXT);
                 messageExecute(message);
-                break;
-            case 3:
+            }
+            case 3 -> {
                 message.setText("Задание номер " + stage + ":\n\n" +
                         "Сколько будет 0 + 0 ?\n\n" +
                         MainDictionary.HOW_TO_ANSWER_TEXT);
                 messageExecute(message);
-                break;
-            case 4:
+            }
+            case 4 -> {
                 message.setText("Задание номер " + stage + ":\n\n" +
                         "Сколько будет 5 * 5 ?\n\n" +
                         MainDictionary.HOW_TO_ANSWER_TEXT);
                 messageExecute(message);
-                break;
-            case 5:
+            }
+            case 5 -> {
                 message.setText("Задание номер " + stage + ":\n\n" +
                         "Сколько будет 2 + 4 * 4 ?\n\n" +
                         MainDictionary.HOW_TO_ANSWER_TEXT);
                 messageExecute(message);
-                break;
-            case 6:
+            }
+            case 6 -> {
                 message.setText("Задание номер " + stage + ":\n\n" +
                         "Сколько будет 1000 - 7 ?\n\n" +
                         MainDictionary.HOW_TO_ANSWER_TEXT);
                 messageExecute(message);
-                break;
-            default:
+            }
+            default -> {
                 message.setText("Что-то пошло не так. Попробуйте позже и сообщите об этом ментору");
                 messageExecute(message);
+            }
         }
     }
 

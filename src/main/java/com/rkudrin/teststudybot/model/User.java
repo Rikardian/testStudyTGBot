@@ -1,20 +1,17 @@
 package com.rkudrin.teststudybot.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
 public class User {
 
     @Id
@@ -38,6 +35,86 @@ public class User {
 
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PaymentsData> studyPaidDates;
+
+    public Long getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public LocalDateTime getRegisteredAt() {
+        return registeredAt;
+    }
+
+    public void setRegisteredAt(LocalDateTime registeredAt) {
+        this.registeredAt = registeredAt;
+    }
+
+    public int getCurrentStudyStage() {
+        return currentStudyStage;
+    }
+
+    public void setCurrentStudyStage(int currentStudyStage) {
+        this.currentStudyStage = currentStudyStage;
+    }
+
+    public int getTotalStudyStage() {
+        return totalStudyStage;
+    }
+
+    public void setTotalStudyStage(int totalStudyStage) {
+        this.totalStudyStage = totalStudyStage;
+    }
+
+    public String getRank() {
+        return rank;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
+    }
+
+    public boolean isStudyPaid() {
+        return isStudyPaid;
+    }
+
+    public void setStudyPaid(boolean studyPaid) {
+        isStudyPaid = studyPaid;
+    }
+
+    public List<PaymentsData> getStudyPaidDates() {
+        return studyPaidDates;
+    }
+
+    public void setStudyPaidDates(List<PaymentsData> studyPaidDates) {
+        this.studyPaidDates = studyPaidDates;
+    }
 
     private final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
